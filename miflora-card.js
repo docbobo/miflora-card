@@ -1,4 +1,4 @@
-/* miflora-card - version: v0.1.0 */
+console.info("%c  MIFLORA-CARD  \n%c Version 0.1.3 ", "color: orange; font-weight: bold; background: black", "color: white; font-weight: bold; background: dimgray");
 class MifloraCard extends HTMLElement {
     constructor() {
         super();
@@ -49,14 +49,14 @@ class MifloraCard extends HTMLElement {
     set hass(hass) {
         const config = this.config;
 
-        var _maxIntensity = config.max_intensity;
-        var _minIntensity = config.min_intensity;
-        var _maxMoisture = config.max_moisture;
-        var _minMoisture = config.min_moisture;
-        var _maxConductivity = config.max_conductivity;
-        var _minConductivity = config.min_conductivity;
-        var _maxTemperature = config.max_termperature;
-        var _minTemperature = config.min_termperature;
+        var _maxIntensity = parseFloat(config.max_intensity);
+        var _minIntensity = parseFloat(config.min_intensity);
+        var _maxMoisture = parseFloat(config.max_moisture);
+        var _minMoisture = parseFloat(config.min_moisture);
+        var _maxConductivity = parseFloat(config.max_conductivity);
+        var _minConductivity = parseFloat(config.min_conductivity);
+        var _maxTemperature = parseFloat(config.max_termperature);
+        var _minTemperature = parseFloat(config.min_termperature);
 
         this.shadowRoot.getElementById('container').innerHTML = `
             <div class="content clearfix">
@@ -65,22 +65,26 @@ class MifloraCard extends HTMLElement {
             `;
 
         for (var i = 0; i < config.entities.length; i++) {
-            var _type = config.entities[i].type;
-            var _sensor = config.entities[i].entity;
+            var _name = config.entities[i]['type'];
+            var _sensor = config.entities[i]['entity'];
+            if (config.entities[i]['name']) {
+                var _display_name = config.entities[i]['name'];
+            } else {
+                var _display_name = _name[0].toUpperCase() + _name.slice(1);
+            }
             var _state = '';
             var _uom = '';
             if (hass.states[_sensor]) {
-                _state = hass.states[_sensor].state;
+                _state = parseFloat(hass.states[_sensor].state);
                 _uom = hass.states[_sensor].attributes.unit_of_measurement || "";
             } else {
                 _state = 'Invalid Sensor';
             }
 
-            var _icon = this._computeIcon(_type, _state);
-            var _name = config.entities[i].name ? config.entities[i].name : _type;
+            var _icon = this._computeIcon(_name, _state);
             var _alertStyle = '';
             var _alertIcon = '';
-            if (_type == 'intensity') {
+            if (_name == 'intensity') {
                 if (_state > _maxIntensity) {
                     _alertStyle = ';color:red';
                     _alertIcon = '&#9650; ';
@@ -89,7 +93,7 @@ class MifloraCard extends HTMLElement {
                     _alertIcon = '&#9660; ';
                 }
             }
-            if (_type == 'moisture') {
+            if (_name == 'moisture') {
                 if (_state > _maxMoisture) {
                     _alertStyle = ';color:red';
                     _alertIcon = '&#9650; ';
@@ -98,7 +102,7 @@ class MifloraCard extends HTMLElement {
                     _alertIcon = '&#9660; '
                 }
             }
-            if (_type == 'conductivity') {
+            if (_name == 'conductivity') {
                 if (_state > _maxConductivity) {
                     _alertStyle = ';color:red';
                     _alertIcon = '&#9650; ';
@@ -107,7 +111,7 @@ class MifloraCard extends HTMLElement {
                     _alertIcon = '&#9660; ';
                 }
             }
-            if (_type == 'temperature') {
+            if (_name == 'temperature') {
                 if (_state > _maxTemperature) {
                     _alertStyle = ';color:red';
                     _alertIcon = '&#9650; ';
@@ -119,14 +123,14 @@ class MifloraCard extends HTMLElement {
             this.shadowRoot.getElementById('sensors').innerHTML += `
                 <div id="sensor${i}" class="sensor">
                     <div class="icon"><ha-icon icon="${_icon}"></ha-icon></div>
-                    <div class="name">${_name}</div>
+                    <div class="name">${_display_name[0].toUpperCase()}${_display_name.slice(1)}</div>
                     <div class="state" style="${_alertStyle}">${_alertIcon}${_state}${_uom}</div>
                 </div>
                 `
         }
 
         for (var i = 0; i < config.entities.length; i++) {
-            this.shadowRoot.getElementById('sensor' + [i]).onclick = this._click.bind(this, config.entities[i].entity);
+            this.shadowRoot.getElementById('sensor' + [i]).onclick = this._click.bind(this, config.entities[i]['entity']);
         }
     }
 
@@ -148,12 +152,12 @@ class MifloraCard extends HTMLElement {
 
         style.textContent = `
             ha-card {
-            position: relative;
-            padding: 0;
-            background-size: 100%;
+                position: relative;
+                padding: 0;
+                background-size: 100%;
             }
             ha-card .header {
-            width: 100%;
+                width: 100%;
             }
             .image {
                 float: right;
