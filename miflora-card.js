@@ -49,9 +49,13 @@ class MifloraCard extends HTMLElement {
     set hass(hass) {
         const config = this.config;
 
+        var _maxIntensity = config.max_intensity;
+        var _minIntensity = config.min_intensity;
         var _maxMoisture = config.max_moisture;
         var _minMoisture = config.min_moisture;
+        var _maxConductivity = config.max_conductivity;
         var _minConductivity = config.min_conductivity;
+        var _maxTemperature = config.max_termperature;
         var _minTemperature = config.min_termperature;
 
         this.shadowRoot.getElementById('container').innerHTML = `
@@ -76,6 +80,15 @@ class MifloraCard extends HTMLElement {
             var _name = config.entities[i].name ? config.entities[i].name : _type;
             var _alertStyle = '';
             var _alertIcon = '';
+            if (_type == 'intensity') {
+                if (_state > _maxIntensity) {
+                    _alertStyle = ';color:red';
+                    _alertIcon = '&#9650; ';
+                } else if (_state < _minIntensity) {
+                    _alertStyle = ';color:red';
+                    _alertIcon = '&#9660; ';
+                }
+            }
             if (_type == 'moisture') {
                 if (_state > _maxMoisture) {
                     _alertStyle = ';color:red';
@@ -86,13 +99,19 @@ class MifloraCard extends HTMLElement {
                 }
             }
             if (_type == 'conductivity') {
-                if (_state < _minConductivity) {
+                if (_state > _maxConductivity) {
+                    _alertStyle = ';color:red';
+                    _alertIcon = '&#9650; ';
+                } else if (_state < _minConductivity) {
                     _alertStyle = ';color:red';
                     _alertIcon = '&#9660; ';
                 }
             }
-            if (_type == 'termperature') {
-                if (_state < _minTemperature) {
+            if (_type == 'temperature') {
+                if (_state > _maxTemperature) {
+                    _alertStyle = ';color:red';
+                    _alertIcon = '&#9650; ';
+                } else if (_state < _minTemperature) {
                     _alertStyle = ';color:red';
                     _alertIcon = '&#9660; ';
                 }
